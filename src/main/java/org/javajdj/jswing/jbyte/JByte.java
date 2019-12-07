@@ -81,7 +81,7 @@ public class JByte
   {
     this.displayedValue = displayedValue;
     for (int i = 0; i < 8; i++)
-      this.box[i].setDisplayedValue ((this.displayedValue & (1 << i)) != 0);
+      this.box[i].setDisplayedValue ((this.displayedValue & (0x80 >>> i)) != 0);
   }
      
   //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
