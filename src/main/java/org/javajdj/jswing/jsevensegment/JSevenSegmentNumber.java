@@ -58,6 +58,45 @@ public class JSevenSegmentNumber
     this (null, sign, numberOfDigits, decimalPointIndex);
   }
   
+  private static int numberOfDigits (final double minValue, final double maxValue, final double resolution)
+  {
+    if (resolution <= 0)
+      throw new IllegalArgumentException ();
+    if (minValue > maxValue)
+      throw new IllegalArgumentException ();
+    return Math.max (
+        (int) Math.ceil (Math.log10 (Math.max (1.0, Math.abs (minValue / resolution)))),
+        (int) Math.ceil (Math.log10 (Math.max (1.0, Math.abs (maxValue / resolution))))
+      );
+  }
+  
+  private static int numberOfFractionalDigits (final double resolution)
+  {
+    if (resolution <= 0)
+      throw new IllegalArgumentException ();
+    if (resolution >= 1.0)
+      return 0;
+    return (int) - Math.ceil (Math.log10 (resolution));
+  }
+  
+  private static int decimalPointIndex (final double minValue, final double maxValue, final double resolution)
+  {
+    final int numberOfFractionalDigits = JSevenSegmentNumber.numberOfFractionalDigits (resolution);
+    final int numberOfDigits = JSevenSegmentNumber.numberOfDigits (minValue, maxValue, resolution);
+    if (numberOfFractionalDigits == 0)
+      return -1;
+    else
+      return (numberOfDigits - 1) - numberOfFractionalDigits;
+  }
+  
+  public JSevenSegmentNumber (final Color mediumColor, final double minValue, final double maxValue, final double resolution)
+  {
+    this (mediumColor,
+      minValue < 0 || maxValue < 0,
+      JSevenSegmentNumber.numberOfDigits (minValue, maxValue, resolution),
+      JSevenSegmentNumber.decimalPointIndex (minValue, maxValue, resolution));
+  }
+  
   private final JSevenSegmentDigit minus;
   
   private final JSevenSegmentDigit[] digits;
@@ -106,6 +145,31 @@ public class JSevenSegmentNumber
     }  
   }
 
+  /** Blanks all digits, including (if present) sign and decimal points.
+   * 
+   */
+  public final void setBlank ()
+  {
+    if (this.minus != null)
+    {
+      this.minus.setBlank ();
+      this.minus.repaint ();
+    }
+    for (final JSevenSegmentDigit digit: this.digits)
+    {
+      digit.setBlank ();
+      digit.repaint ();
+    }
+  }
+  
+  public final void setNumber (final Double number)
+  {
+    if (number != null)
+      setNumber ((double) number);
+    else
+      setBlank ();
+  }
+  
   //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
   //
   // END OF FILE
