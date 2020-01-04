@@ -36,7 +36,7 @@ public class JSevenSegmentNumber
   
   public JSevenSegmentNumber (final Color mediumColor, final boolean sign, final int numberOfDigits, final int decimalPointIndex)
   {
-    this.minus = sign ? new JSevenSegmentDigit () : null;
+    this.minus = sign ? new JSevenSegmentDigit (mediumColor) : null;
     setLayout (new GridLayout (1, this.minus != null ? (numberOfDigits + 1) : numberOfDigits));
     if (this.minus != null)
       add (this.minus);
