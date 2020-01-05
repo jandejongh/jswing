@@ -18,7 +18,9 @@ package org.javajdj.jswing.jbyte;
 
 import java.awt.Color;
 import java.awt.GridLayout;
+import java.util.List;
 import java.util.function.Function;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
 import org.javajdj.jswing.jcolorcheckbox.JColorCheckBox;
 
@@ -37,23 +39,36 @@ public class JByte
   //
   //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
   
-  public JByte (final Color color)
+  public JByte (final Color color, final List<String> labelStrings)
   {
     super ();
     this.color = (color != null ? color : JByte.DEFAULT_COLOR);
+    if (labelStrings != null && labelStrings.size () != 8)
+      throw new IllegalArgumentException ();
     setOpaque (true);
-    setLayout (new GridLayout (1, 8));
+    setLayout (new GridLayout (labelStrings == null ? 1 : 2, 8));
     this.box = new JColorCheckBox.JBoolean[8];
     for (int i = 0; i < 8; i++)
     {
       this.box[i] = new JColorCheckBox.JBoolean ((Function<Boolean, Color>) (Boolean t) -> (t != null && t) ? this.color : null);
       add (this.box[i]);
     }
+    if (labelStrings != null)
+      for (final String labelString : labelStrings)
+        if (labelString != null)
+          add (new JLabel (labelString));
+        else
+          add (new JLabel ());
+  }
+  
+  public JByte (final Color color)
+  {
+    this (color, null);
   }
   
   public JByte ()
   {
-    this (JByte.DEFAULT_COLOR);
+    this (JByte.DEFAULT_COLOR, null);
   }
   
   //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
