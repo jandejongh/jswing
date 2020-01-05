@@ -410,7 +410,7 @@ public class JColorCheckBox<E>
      * @param colorFunction The color function.
      * 
      */
-    public JBoolean (Function<Boolean, Color> colorFunction)
+    public JBoolean (final Function<Boolean, Color> colorFunction)
     {
       super (colorFunction);
     }
@@ -420,9 +420,20 @@ public class JColorCheckBox<E>
      * @param colorMap The color map.
      * 
      */
-    public JBoolean (Map<Boolean, Color> colorMap)
+    public JBoolean (final Map<Boolean, Color> colorMap)
     {
       super (colorMap);
+    }
+    
+    /** Creates a check-box for a boolean value filling
+     *  with a given {@link Color} if and only if the value is non-{code null} and {@code true}.
+     *
+     * @param color The fill color to use for {@code true} values.
+     * 
+     */
+    public JBoolean (final Color color)
+    {
+      this (b -> (b != null && b) ? color : null);
     }
     
     /** Creates a check-box for a boolean value with default color scheme.
