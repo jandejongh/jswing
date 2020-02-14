@@ -101,6 +101,16 @@ public class JSevenSegmentNumber
   
   private final JSevenSegmentDigit[] digits;
   
+  /** Returns the number of digits in this component, excluding the minus-sign digit.
+   * 
+   * @return The number of digits in this component, excluding the minus-sign digit.
+   * 
+   */
+  public final int getNumberOfDigits ()
+  {
+    return this.digits.length;
+  }
+  
   private final DecimalFormat decimalFormat;
   
   private final int decimalPointIndex;
