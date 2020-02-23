@@ -64,6 +64,7 @@ public class JBooleans
       final JColorCheckBox.JBoolean box = new JColorCheckBox.JBoolean (colorFunction);
       box.setHorizontalAlignment (SwingConstants.CENTER);
       box.setVerticalAlignment (SwingConstants.CENTER);
+      box.setEnabled (false);
       this.boxMap.put (labelString, box);
       add (box);      
     }
