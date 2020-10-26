@@ -263,7 +263,7 @@ public class JTrace<K>
   //
   //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
   
-  private final static Color[] DEFAULT_COLORS =
+  public final static Color[] DEFAULT_COLORS =
   {
     Color.yellow,
     Color.cyan,
@@ -470,7 +470,7 @@ public class JTrace<K>
     for (final Map.Entry<K, TraceEntry> traceEntryEntry : traceEntries.entrySet ())
     {
       if (traceEntryEntry == null)
-        continue;;
+        continue;
       final K key = traceEntryEntry.getKey ();
       final TraceEntry traceEntry = traceEntryEntry.getValue ();
       if (traceEntry == null)
