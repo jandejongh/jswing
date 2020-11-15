@@ -18,7 +18,11 @@ package org.javajdj.jswing.jbyte;
 
 import java.awt.Color;
 import java.awt.GridLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.util.Arrays;
 import java.util.List;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -39,7 +43,12 @@ public class JBitsLong
   //
   //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
   
-  public JBitsLong (final Color color, final int length, final List<String> labelStrings)
+  public JBitsLong (
+    final Color color,
+    final int length,
+    final List<String> labelStrings,
+    final Consumer<Long> listener,
+    final boolean autoUpdate)
   {
     super ();
     this.color = (color != null ? color : JBitsLong.DEFAULT_COLOR);
@@ -47,12 +56,16 @@ public class JBitsLong
       throw new IllegalArgumentException ();
     if (labelStrings != null && labelStrings.size () != length)
       throw new IllegalArgumentException ();
+    this.listener = listener;
+    this.autoUpdate = autoUpdate;
     setOpaque (true);
     setLayout (new GridLayout (labelStrings == null ? 1 : 2, length));
     this.box = new JColorCheckBox.JBoolean[length];
     for (int i = 0; i < length; i++)
     {
       this.box[i] = new JColorCheckBox.JBoolean ((Function<Boolean, Color>) (Boolean t) -> (t != null && t) ? this.color : null);
+      if (listener != null || autoUpdate)
+        this.box[i].addActionListener (new BoxListener (length - i - 1));        
       add (this.box[i]);
     }
     if (labelStrings != null)
@@ -61,6 +74,14 @@ public class JBitsLong
           add (new JLabel (labelString));
         else
           add (new JLabel ());
+  }
+  
+  public JBitsLong (
+    final Color color,
+    final int length,
+    final List<String> labelStrings)
+  {
+    this (color, length, labelStrings, null, false);
   }
   
   public JBitsLong (final Color color, final int length)
@@ -75,6 +96,11 @@ public class JBitsLong
   //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
   private final JColorCheckBox.JBoolean[] box;
+  
+  public final JColorCheckBox.JBoolean[] getBoxes ()
+  {
+    return Arrays.copyOf (this.box, this.box.length);
+  }
 
   //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
   //
@@ -95,7 +121,7 @@ public class JBitsLong
     for (int i = 0; i < this.box.length; i++)
       this.box[i].setDisplayedValue ((this.displayedValue & (0x8000000000000000L >>> (64 - this.box.length + i))) != 0);
   }
-     
+
   //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
   //
   // COLOR
@@ -109,6 +135,45 @@ public class JBitsLong
   public final Color getColor ()
   {
     return this.color;
+  }
+  
+  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  //
+  // LISTENER
+  //
+  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+  private final Consumer<Long> listener;
+  
+  private final boolean autoUpdate;
+  
+  private final class BoxListener
+    implements ActionListener
+  {
+
+    public BoxListener (final int bit)
+    {
+      this.bit = bit;
+    }
+    
+    
+    final int bit;
+    
+    @Override
+    public void actionPerformed (ActionEvent ae)
+    {
+      final long newValue;
+      synchronized (JBitsLong.this)
+      {
+        final long oldValue = JBitsLong.this.getDisplayedValue ();
+        newValue = oldValue ^ (1L << this.bit);
+        if (JBitsLong.this.autoUpdate)
+          JBitsLong.this.setDisplayedValue (newValue);
+      }
+      if (JBitsLong.this.listener != null)
+        JBitsLong.this.listener.accept (newValue);
+    }
+    
   }
   
   //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
