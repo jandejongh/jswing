@@ -22,11 +22,11 @@ import java.util.logging.Logger;
 /** A trace (array of doubles) augmented with boundary and graphics information.
  * 
  * <p>
- * This class is designed for internal use in {@link JTrace}, but is exposed
+ * This class is designed for internal use in {@link JTraceDisplay}, but is exposed
  * as it may be useful in other use cases as well.
  * 
  * <p>
- * The class is final because it is used internally in {@link JTrace};
+ * The class is final because it is used internally in {@link JTraceDisplay};
  * often by recreating {@link TraceEntry} objects with (slightly) different properties.
  * 
  * <p>

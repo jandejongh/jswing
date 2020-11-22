@@ -41,7 +41,7 @@ import javax.swing.SwingUtilities;
  * 
  * @author Jan de Jongh {@literal <jfcmdejongh@gmail.com>}
  */
-public class JTrace<K>
+public class JTraceDisplay<K>
   extends JPanel
 {
 
@@ -51,7 +51,7 @@ public class JTrace<K>
   //
   //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
   
-  private static final Logger LOG = Logger.getLogger (JTrace.class.getName ());
+  private static final Logger LOG = Logger.getLogger (JTraceDisplay.class.getName ());
   
   //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
   //
@@ -59,7 +59,7 @@ public class JTrace<K>
   //
   //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
   
-  public JTrace ()
+  public JTraceDisplay ()
   {
     super ();
     setOpaque (true);
@@ -646,25 +646,25 @@ public class JTrace<K>
     @Override
     public void mouseExited (final MouseEvent e)
     {
-      JTrace.this.drawCrossHair = false;
-      JTrace.this.repaint ();
+      JTraceDisplay.this.drawCrossHair = false;
+      JTraceDisplay.this.repaint ();
     }
 
     @Override
     public void mouseEntered (final MouseEvent e)
     {
-      JTrace.this.mouseX = e.getX ();
-      JTrace.this.mouseY = e.getY ();
-      JTrace.this.drawCrossHair = true;
-      JTrace.this.repaint ();
+      JTraceDisplay.this.mouseX = e.getX ();
+      JTraceDisplay.this.mouseY = e.getY ();
+      JTraceDisplay.this.drawCrossHair = true;
+      JTraceDisplay.this.repaint ();
     }
 
     @Override
     public void mouseMoved (final MouseEvent e)
     {
-      JTrace.this.mouseX = e.getX ();
-      JTrace.this.mouseY = e.getY ();
-      JTrace.this.repaint ();
+      JTraceDisplay.this.mouseX = e.getX ();
+      JTraceDisplay.this.mouseY = e.getY ();
+      JTraceDisplay.this.repaint ();
     }
 
   };
