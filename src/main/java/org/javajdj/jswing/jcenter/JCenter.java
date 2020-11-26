@@ -21,7 +21,8 @@ import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
-/** A Swing {@link JPanel} that centers a single {@link JComponent} passed at construction without resizing it.
+/** A Swing {@link JPanel} that centers (in X, Y or both dimensions)
+ *  a single {@link JComponent} passed at construction <i>without resizing it</i>.
  * 
  * <p>
  * Centering the component may be in X direction, Y direction, or both (or none, in which case the component
