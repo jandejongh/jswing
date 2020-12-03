@@ -3,7 +3,7 @@
  * 
  * <p>
  * The package supports various combinations of data from traces ({@code double} arrays} and {@code Function}s,
- * as well as Z-modulation (e.g., though brightness or line thickness).
+ * as well as Z-modulation (e.g., though brightness or line thickness) and <i>markers</i>.
  * 
  * @author Jan de Jongh {@literal <jfcmdejongh@gmail.com>}
  * 
