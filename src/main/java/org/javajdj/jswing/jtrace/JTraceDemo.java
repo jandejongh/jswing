@@ -215,7 +215,6 @@ public final class JTraceDemo
     // Again, placement and scaling of the curve is easily controlled with the X and Y range settings.
     // The fifth trace also shows the impact of clipping (red parts at the top of the figure).
     
-    final Object key5 = new Object ();
     final TraceData test5 = new TraceData (
       TraceData.Type.XnYnZn,
       xn, yn, zn, null,
