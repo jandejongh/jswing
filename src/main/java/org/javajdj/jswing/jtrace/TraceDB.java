@@ -178,7 +178,11 @@ public class TraceDB<K>
   
   /** Returns an unmodifiable (and temporary) view on the database (entries).
    * 
-   * @return The trace entries as a {@link Map}; cannot (should not) be modified.
+   * <p>
+   * A copy is created as return value; subsequent changes to the trace entries or the map are not
+   * reflected in the returned {@link Map}.
+   * 
+   * @return The trace entries (as a copied {@link Map}); cannot (should not) be modified.
    * 
    * @see Collections#unmodifiableMap
    * 
