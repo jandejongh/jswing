@@ -79,8 +79,8 @@ public final class JTraceDemo
     final TraceDB<Integer> traceDB = createTraceDB ();
       
     // Create the two components, sharing a single TraceDB instance.
-    final JTrace jTrace = new JTrace (traceDB);
-    final JTraceDisplay jTraceDisplay = new JTraceDisplay (traceDB);
+    final JTrace<Integer> jTrace = new JTrace<> (traceDB);
+    final JTraceDisplay<Integer> jTraceDisplay = new JTraceDisplay<> (traceDB);
     
     // Explicitly set the number of X, Y divisions to ten on both displays,
     // and set the graticule origin at the center of the screen.
