@@ -18,6 +18,7 @@ package org.javajdj.jswing.jtrace;
 
 import java.awt.Color;
 import java.util.Collections;
+import java.util.function.Function;
 import java.util.logging.Logger;
 import javax.swing.JFrame;
 import javax.swing.JTabbedPane;
@@ -193,7 +194,7 @@ public final class JTraceDemo
       TraceData.Type.XnYn,
       xn, yn, null, null,
       null, null, null, null,
-      null, new TraceData.DoubleRange (-6, 2), new TraceData.DoubleRange (-1, 9), null);
+      null, new TraceData.DoubleRange (-6, 2), new TraceData.DoubleRange (-2, 8), null);
     traceDB.setTraceData (3, test3);
     traceDB.addTraceMarkers (3, Collections.singleton (TraceMarker.ZERO_X_SIDE_MARKER));
     traceDB.addTraceMarkers (3, Collections.singleton (TraceMarker.ZERO_Y_SIDE_MARKER));
@@ -225,10 +226,35 @@ public final class JTraceDemo
     traceDB.addTraceMarkers (5, Collections.singleton (TraceMarker.ZERO_X_SIDE_MARKER));
     traceDB.addTraceMarkers (5, Collections.singleton (TraceMarker.ZERO_Y_SIDE_MARKER));
 
+    // The sixth trace uses a Function to specify the trace data.
+    // Note that with the F_Y_vs_X display mode, setting the X range is mandatory.
+    // We set the Y range such that the trace appears at the bottom of the display with 2 divisions peak-to-peak value.
+    
+    final TraceData test6 = new TraceData (
+      TraceData.Type.F_Y_vs_X,
+      null, null, null, REFERENCE_SAW_TOOTH,
+      null, null, null, null,
+      null, new TraceData.DoubleRange (-3, 7), new TraceData.DoubleRange (-1, 9), null);
+    traceDB.setTraceData (6, test6);
+    traceDB.setTraceColor (6, Color.WHITE);
+    traceDB.addTraceMarkers (6, Collections.singleton (TraceMarker.ZERO_X_SIDE_MARKER));
+    traceDB.addTraceMarkers (6, Collections.singleton (TraceMarker.ZERO_Y_SIDE_MARKER));
+
     return traceDB;
     
   }
   
+  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  //
+  // REFERENCE SAWTOOTH FUNCTION
+  //
+  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  
+  /** A sawtooth function with period 1, average value 0, peak-to-peak value 2 and {@code f(0+) = -1}.
+   * 
+   */
+  private final static Function<Double, Double> REFERENCE_SAW_TOOTH = (t) -> 2 * Math.IEEEremainder (t - 0.5, 1);
+
   //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
   //
   // END OF FILE
