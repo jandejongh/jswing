@@ -246,6 +246,13 @@ public class JTrace<K>
     this.traceDB.setTraceData (k, traceData);
   }
   
+  /** Default trace colors (delegated static field).
+   * 
+   * @see TraceDB#DEFAULT_TRACE_COLORS
+   * 
+   */
+  public final static Color[] DEFAULT_TRACE_COLORS = TraceDB.DEFAULT_TRACE_COLORS;
+    
   /** Sets the trace {@link Color} for given key (delegate method).
    * 
    * @param k          See {@link TraceDB#setTraceColor}.
@@ -254,7 +261,7 @@ public class JTrace<K>
    * @see #getTraceDB
    * 
    */
-  public final void setTraceData (final K k, final Color traceColor)
+  public final void setTraceColor (final K k, final Color traceColor)
   {
     this.traceDB.setTraceColor (k, traceColor);
   }
