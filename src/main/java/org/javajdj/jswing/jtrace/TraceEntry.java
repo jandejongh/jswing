@@ -17,13 +17,16 @@
 package org.javajdj.jswing.jtrace;
 
 import java.awt.Color;
+import java.util.Collections;
+import java.util.EnumSet;
+import java.util.Set;
 import java.util.logging.Logger;
 
-/** A trace (array of doubles) augmented with boundary and graphics information.
+/** Trace data (as entry in a trace database) augmented with markers and graphics information.
  * 
  * <p>
- * This class is designed for internal use in {@link JTraceDisplay}, but is exposed
- * as it may be useful in other use cases as well.
+ * This class is designed for internal use in {@link JTrace}, {@link JTraceDisplay}, and {@link TraceDB},
+ * but is exposed as it may be useful in other use cases as well.
  * 
  * <p>
  * The class is final because it is used internally in {@link JTraceDisplay};
@@ -52,150 +55,181 @@ public final class TraceEntry
   //
   //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
   
+  /** Constructs the trace entry (main constructor).
+   * 
+   * @param traceData    The trace data, may be {@code null}.
+   * @param traceColor   The trace color, may be {@code null}.
+   * @param traceMarkers The (initial) {@link Set} of trace markers, may be {@code null} or empty
+   *                       but must <i>not</i> contain {@code null}.
+   * 
+   * @throws IllegalArgumentException If the set of trace markers contains {@code null}.
+   * 
+   */
   public TraceEntry (
-    final double[] trace,
-    final double minX,
-    final double maxX,
-    final double minY,
-    final double maxY,
-    final Color color)
+    final TraceData traceData,
+    final Color traceColor,
+    final Set<TraceMarker> traceMarkers)
   {
-    this.trace = trace;
-    this.minX = minX;
-    this.maxX = maxX;
-    this.minY = minY;
-    this.maxY = maxY;
-    this.color = color;
+    this.traceData = traceData;
+    this.traceColor = traceColor;
+    if (traceMarkers != null)
+    {
+      if (traceMarkers.contains (null))
+        throw new IllegalArgumentException ();
+      this.traceMarkers.addAll (traceMarkers);
+    }
   }
 
-  public static TraceEntry EMPTY = new TraceEntry (
-      null,
-      Double.NaN, Double.NaN, Double.NaN, Double.NaN,
-      null);
+
+  /** Constructs the trace entry (auxiliary constructor).
+   * 
+   * <p>
+   * The initial {@link Set} of {@link TraceMarker}s is empty.
+   * 
+   * @param traceData  The trace data, may be {@code null}.
+   * @param traceColor The trace color, may be {@code null}.
+   * 
+   */
+  public TraceEntry (
+    final TraceData traceData,
+    final Color traceColor)
+  {
+    this (traceData, traceColor, null);
+  }
+
+  /** The empty trace entry (no data, color, markers, etc.).
+   * 
+   */
+  public static TraceEntry EMPTY = new TraceEntry (null, null, null);
+  
+  /** Creates a copy with given {@link TraceData}.
+   * 
+   * @param traceData The new trace data, may be {@code null}.
+   * 
+   * @return The new {@link TraceEntry}.
+   * 
+   */
+  public final TraceEntry withTraceData (final TraceData traceData)
+  {
+    return new TraceEntry (traceData, this.traceColor, this.traceMarkers);
+  }
+  
+  /** Creates a copy with given trace {@link Color}.
+   * 
+   * @param traceColor The new trace {@link Color}, may be {@code null}.
+   * 
+   * @return The new {@link TraceEntry}.
+   * 
+   */
+  public final TraceEntry withTraceColor (final Color traceColor)
+  {
+    return new TraceEntry (this.traceData, traceColor, this.traceMarkers);
+  }
+  
+  /** Creates a copy with given trace markers ({@link TraceMarker}s).
+   * 
+   * <p>
+   * Existing active trace markers are cleared (unless present in the argument).
+   * 
+   * @param traceMarkers A set (may be {@code null} but <i>not</i> contain {@code null}) holding the new {@link TraceMarker}s.
+   * 
+   * @return The new {@link TraceEntry}.
+   * 
+   * @throws IllegalArgumentException If the set of trace markers contains {@code null}.
+   * 
+   */
+  public final TraceEntry withTraceMarkers (final Set<TraceMarker> traceMarkers)
+  {
+    return new TraceEntry (this.traceData, this.traceColor, traceMarkers);
+  }
+  
+  /** Creates a copy with added given trace markers ({@link TraceMarker}s).
+   * 
+   * <p>
+   * Existing active trace markers are maintained.
+   * 
+   * @param traceMarkers A set (may be {@code null} but <i>not</i> contain {@code null}) holding the {@link TraceMarker}s to add.
+   * 
+   * @return The new {@link TraceEntry}.
+   * 
+   * @throws IllegalArgumentException If the set of trace markers contains {@code null}.
+   * 
+   */
+  public final TraceEntry withTraceMarkersAdded (final Set<TraceMarker> traceMarkers)
+  {
+    final EnumSet<TraceMarker> newTraceMarkers = EnumSet.copyOf (this.traceMarkers);
+    if (traceMarkers != null)
+      newTraceMarkers.addAll (traceMarkers);
+    return new TraceEntry (this.traceData, this.traceColor, newTraceMarkers);
+  }
+  
+  /** Creates a copy without trace markers ({@link TraceMarker}s).
+   * 
+   * @return The new {@link TraceEntry}.
+   * 
+   */
+  public final TraceEntry withoutTraceMarkers ()
+  {
+    return new TraceEntry (this.traceData, this.traceColor, null);
+  }
+  
+  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  //
+  // TRACE DATA
+  //
+  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  
+  private final TraceData traceData;
+  
+  /** Returns the trace data.
+   * 
+   * @return The trace data, may be {@code null}.
+   * 
+   */
+  public final TraceData getTraceData ()
+  {
+    return this.traceData;
+  }
     
-  public final TraceEntry withTrace (final double[] trace)
-  {
-    return new TraceEntry (
-      trace,
-      this.minX, this.maxX, this.minY, this.maxY,
-      this.color);
-  }
+  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  //
+  // TRACE COLOR
+  //
+  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
   
-  public final TraceEntry withMinX (final double minX)
-  {
-    return new TraceEntry (
-      this.trace,
-      minX, this.maxX, this.minY, this.maxY,
-      this.color);
-  }
+  private final Color traceColor;
   
-  public final TraceEntry withMaxX (final double maxX)
+  /** Returns the trace {@link Color}.
+   * 
+   * @return The trace {@link Color}, may be {@code null}.
+   * 
+   */
+  public final Color getTraceColor ()
   {
-    return new TraceEntry (
-      this.trace,
-      this.minX, maxX, this.minY, this.maxY,
-      this.color);
-  }
-  
-  public final TraceEntry withMinY (final double minY)
-  {
-    return new TraceEntry (
-      this.trace,
-      this.minX, this.maxX, minY, this.maxY,
-      this.color);
-  }
-  
-  public final TraceEntry withMaxY (final double maxY)
-  {
-    return new TraceEntry (
-      this.trace,
-      this.minX, this.maxX, this.minY, maxY,
-      this.color);
-  }
-  
-  public final TraceEntry withBoundaries (
-    final double minX,
-    final double maxX,
-    final double minY,
-    final double maxY)
-  {
-    return new TraceEntry (
-      this.trace,
-      minX, maxX, minY, maxY,
-      this.color);
-  }
-  
-  public final TraceEntry withColor (final Color color)
-  {
-    return new TraceEntry (
-      this.trace,
-      this.minX, this.maxX, this.minY, this.maxY,
-      color);
+    return this.traceColor;
   }
   
   //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
   //
-  // TRACE
+  // TRACE MARKERS
   //
   //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
   
-  private final double[] trace;
+  private final EnumSet<TraceMarker> traceMarkers = EnumSet.noneOf (TraceMarker.class);
   
-  public final double[] getTrace ()
+  /** Returns the set of active {@link TraceMarker}s.
+   * 
+   * <p>
+   * The result is an unmodifiable collection.
+   * 
+   * @return A {@link Set} (view) holding the active trace markers.
+   * 
+   * @see Collections#unmodifiableSet
+   * 
+   */
+  public final Set<TraceMarker> getTraceMarkers ()
   {
-    return this.trace;
-  }
-  
-  public final int getTraceLength ()
-  {
-    return this.trace != null ? this.trace.length : 0;
-  }
-  
-  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-  //
-  // BOUNDARIES HINTS
-  //
-  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-  
-  private final double minX;
-  
-  public final double getMinX ()
-  {
-    return this.minX;
-  }
-
-  private final double maxX;
-  
-  public final double getMaxX ()
-  {
-    return this.maxX;
-  }
-
-  private final double minY;
-  
-  public final double getMinY ()
-  {
-    return this.minY;
-  }
-
-  private final double maxY;
-
-  public final double getMaxY ()
-  {
-    return this.maxY;
-  }
-  
-  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-  //
-  // COLOR
-  //
-  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-  
-  private final Color color;
-  
-  public final Color getColor ()
-  {
-    return this.color;
+    return Collections.unmodifiableSet (this.traceMarkers);
   }
   
   //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
