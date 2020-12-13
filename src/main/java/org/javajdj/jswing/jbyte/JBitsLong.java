@@ -64,8 +64,9 @@ public class JBitsLong
     for (int i = 0; i < length; i++)
     {
       this.box[i] = new JColorCheckBox.JBoolean ((Function<Boolean, Color>) (Boolean t) -> (t != null && t) ? this.color : null);
-      if (listener != null || autoUpdate)
-        this.box[i].addActionListener (new BoxListener (length - i - 1));        
+      // We now always add an ActionListener to the box, because the listener can be set later.
+      // if (listener != null || autoUpdate)
+      this.box[i].addActionListener (new BoxListener (length - i - 1));        
       add (this.box[i]);
     }
     if (labelStrings != null)
@@ -143,7 +144,12 @@ public class JBitsLong
   //
   //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-  private final Consumer<Long> listener;
+  private volatile Consumer<Long> listener;
+  
+  protected final void setListener (final Consumer<Long> listener)
+  {
+    this.listener = listener;
+  }
   
   private final boolean autoUpdate;
   
@@ -170,8 +176,9 @@ public class JBitsLong
         if (JBitsLong.this.autoUpdate)
           JBitsLong.this.setDisplayedValue (newValue);
       }
-      if (JBitsLong.this.listener != null)
-        JBitsLong.this.listener.accept (newValue);
+      final Consumer<Long> listener = JBitsLong.this.listener;
+      if (listener != null)
+        listener.accept (newValue);
     }
     
   }
