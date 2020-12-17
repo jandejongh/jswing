@@ -79,10 +79,10 @@ public class TraceData
    * @param yUnit The (optional) {@link Unit} for Y values (for all {@link Type}s).
    * @param zUnit The (optional) {@link Unit} for Z values; must <i>not</i> be set for {@link Type}s without Z dimension.
    * 
-   * @param nRange The optional {@link IntegerRange} for N (index) values.
-   * @param xRange The optional {@link DoubleRange} for X values; mandatory for {@link Type#F_Y_vs_X}.
-   * @param yRange The optional {@link DoubleRange} for Y values.
-   * @param zRange The optional {@link DoubleRange} for Z values;
+   * @param nRange The optional {@link DoubleRange} for N (index) values; see also {@link #getNRange}.
+   * @param xRange The optional {@link DoubleRange} for X values; mandatory for {@link Type#F_Y_vs_X}. See also {@link #getXRange}.
+   * @param yRange The optional {@link DoubleRange} for Y values; see also {@link #getYRange}.
+   * @param zRange The optional {@link DoubleRange} for Z values; see also {@link #getZRange};
    *                 must <i>not</i> be set for {@link Type}s without Z dimension.
    * 
    * @throws IllegalArgumentException If {@code type == null},
@@ -103,7 +103,7 @@ public class TraceData
     final Unit xUnit,
     final Unit yUnit,
     final Unit zUnit,
-    final IntegerRange nRange,
+    final DoubleRange nRange,
     final DoubleRange xRange,
     final DoubleRange yRange,
     final DoubleRange zRange)
@@ -220,10 +220,11 @@ public class TraceData
    * <p>
    * Independent of setting X, Y ranges and units, one can set the N range through {@link #withNRange},
    * which (typically) restricts the N range shown in a display component.
-   * The N range may be an arbitrary integer range and does not have to be restricted to the index
+   * The N range may be an arbitrary double range and does not have to be restricted to the index
    * range of the {@code yn} array. It is important to note that setting the N range <i>never</i> affects the
    * relation between X and Y for {@link Type#Yn}.
    * (A similar statement with respect to the N range holds for the other non-function {@link Type}s.)
+   * See also {@link #getNRange}.
    * 
    * <p>
    * Finally, one can (always safely) set the N {@link Unit} through {@link #withNUnit},
@@ -348,9 +349,10 @@ public class TraceData
    * <p>
    * Independent of setting X, Y ranges and units, one can set the N range through {@link #withNRange},
    * which (typically) restricts the N range shown in a display component.
-   * The N range may be an arbitrary integer range and does not have to be restricted to the index
+   * The N range may be an arbitrary double range and does not have to be restricted to the index
    * range of the {@code yn} array. It is important to note that setting the N range <i>never</i> affects the
    * relation between X and Y for {@link Type#XnYn}.
+   * See also {@link #getNRange}.
    * 
    * <p>
    * Finally, one can (always safely) set the N {@link Unit} through {@link #withNUnit};
@@ -479,9 +481,10 @@ public class TraceData
    * <p>
    * Independent of setting X, Y ranges and units, one can set the N range through {@link #withNRange},
    * which (typically) restricts the N range shown in a display component.
-   * The N range may be an arbitrary integer range.
+   * The N range may be an arbitrary double range.
    * It is important to note that setting the N range <i>never</i> affects the
    * relation between X and Y for {@link Type#F_Y_vs_X}.
+   * See also {@link #getNRange}.
    * 
    * <p>
    * The default N range for {@link Type#F_Y_vs_X} is {@link #DEFAULT_N_RANGE}.
@@ -647,7 +650,7 @@ public class TraceData
       this.zRange);
   }
   
-  /** Returns a copy with given N {@link IntegerRange}.
+  /** Returns a copy with given N {@link DoubleRange}.
    * 
    * @param nMin The minimum of the range.
    * @param nMax The maximum of the range.
@@ -658,10 +661,11 @@ public class TraceData
    *                                  or setting the N range is illegal for given trace-data {@link Type}.
    * 
    * @see Type
-   * @see Unit
+   * @see #getNRange
+   * @see DoubleRange
    * 
    */
-  public final TraceData withNRange (final int nMin, final int nMax)
+  public final TraceData withNRange (final double nMin, final double nMax)
   {
     return new TraceData (
       this.type,
@@ -673,7 +677,7 @@ public class TraceData
       this.xUnit,
       this.yUnit,
       this.zUnit,
-      new IntegerRange (nMin, nMax),
+      new DoubleRange (nMin, nMax),
       this.xRange,
       this.yRange,
       this.zRange);
@@ -690,7 +694,8 @@ public class TraceData
    *                                  or setting the X range is illegal for given trace-data {@link Type}.
    * 
    * @see Type
-   * @see Unit
+   * @see #getXRange
+   * @see DoubleRange
    * 
    */
   public final TraceData withXRange (final double xMin, final double xMax)
@@ -722,7 +727,8 @@ public class TraceData
    *                                  or setting the Y range is illegal for given trace-data {@link Type}.
    * 
    * @see Type
-   * @see Unit
+   * @see #getYRange
+   * @see DoubleRange
    * 
    */
   public final TraceData withYRange (final double yMin, final double yMax)
@@ -754,7 +760,8 @@ public class TraceData
    *                                  or setting the Z range is illegal for given trace-data {@link Type}.
    * 
    * @see Type
-   * @see Unit
+   * @see #getZRange
+   * @see DoubleRange
    * 
    */
   public final TraceData withZRange (final double zMin, final double zMax)
@@ -816,9 +823,10 @@ public class TraceData
   /** Returns the trace type.
    * 
    * <p>
-   * The trace type is set upon construction, and since the objects are immutable, it cannot be changed afterwards.
+   * The trace type is set upon construction, and since the objects of this {@code class} are immutable,
+   * it cannot be changed afterwards.
    * 
-   * @return The trace type, always non-{@code null}.
+   * @return The trace type, fixed upon construction and always non-{@code null}.
    * 
    */
   public final Type getType ()
@@ -1190,21 +1198,38 @@ public class TraceData
     
   }
   
-  /** The default length of the N {@link IntegerRange} for function {@link Type}s.
+  /** The default length of the N {@link DoubleRange} for function {@link Type}s.
+   * 
+   * @see #DEFAULT_N_RANGE
+   * @see #getNRange
    * 
    */
   public final static int DEFAULT_N_RANGE_LENGTH = 1024;
   
-  /** The default N {@link IntegerRange} for function {@link Type}s.
+  /** The default N {@link DoubleRange} for function {@link Type}s.
+   * 
+   * <p>
+   * The default interval is {@code [0, 1024)}.
    * 
    * @see #DEFAULT_N_RANGE_LENGTH
+   * @see #getNRange
    * 
    */
-  public final static IntegerRange DEFAULT_N_RANGE = new IntegerRange (0, DEFAULT_N_RANGE_LENGTH);
+  public final static DoubleRange DEFAULT_N_RANGE = new DoubleRange (0, DEFAULT_N_RANGE_LENGTH);
   
-  private final IntegerRange nRange;
+  private final DoubleRange nRange;
   
   /** Returns the (optional) N (index) range of this trace.
+   * 
+   * <p>
+   * For the {@link TraceData} {@code class}, the N Range is irrelevant; it does not affect the fundamental relationships
+   * between X, Y and, if applicable, Z.
+   * The N Range is included to support display functions like
+   * panning and zooming a trace.
+   * 
+   * <p>
+   * Although not a requirement in itself, the convention is that the N Range is half-open: The minimum
+   * is included, but the maximum is <i>not</i>.
    * 
    * @return The N or index range of this trace, null when not present.
    * 
@@ -1213,7 +1238,7 @@ public class TraceData
    * @see #getYRange
    * 
    */
-  public final IntegerRange getNRange ()
+  public final DoubleRange getNRange ()
   {
     return this.nRange;
   }
