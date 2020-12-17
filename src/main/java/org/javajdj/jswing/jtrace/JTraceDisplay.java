@@ -1364,6 +1364,7 @@ public class JTraceDisplay<K>
       final TraceData traceData = traceEntry.getTraceData ();
       if (traceData == null)
         continue;
+      final boolean rescaleDisplayXToNRange = traceEntry.isRescaleDisplayXToNRange ();
       final Color traceColor = traceEntry.getTraceColor ();
       if (traceColor == null)
         continue;
@@ -1375,7 +1376,7 @@ public class JTraceDisplay<K>
           final double[] yn = traceData.getYnData ();
           if (yn == null || yn.length == 0)
             continue;
-          final TraceData.IntegerRange nRange = traceData.getNRange ();
+          final TraceData.DoubleRange nRange = traceData.getNRange ();
           final TraceData.DoubleRange xRange = traceData.getXRange ();
           final TraceData.DoubleRange yRange = traceData.getYRange ();
           paintTrace_XYZn (
@@ -1384,6 +1385,7 @@ public class JTraceDisplay<K>
             xMargin, yMargin,
             null, yn, null,
             nRange, xRange, yRange, null,
+            rescaleDisplayXToNRange,
             traceColor, clipColor,
             defaultTraceLineWidth,
             zModulationDisplayPolicy,
@@ -1398,7 +1400,7 @@ public class JTraceDisplay<K>
           final double[] zn = traceData.getZnData ();
           if (yn == null || yn.length == 0 || zn == null || zn.length == 0)
             continue;
-          final TraceData.IntegerRange nRange = traceData.getNRange ();
+          final TraceData.DoubleRange nRange = traceData.getNRange ();
           final TraceData.DoubleRange xRange = traceData.getXRange ();
           final TraceData.DoubleRange yRange = traceData.getYRange ();
           final TraceData.DoubleRange zRange = traceData.getZRange ();
@@ -1408,6 +1410,7 @@ public class JTraceDisplay<K>
             xMargin, yMargin,
             null, yn, zn,
             nRange, xRange, yRange, zRange,
+            rescaleDisplayXToNRange,
             traceColor, clipColor,
             defaultTraceLineWidth,
             zModulationDisplayPolicy,
@@ -1422,7 +1425,7 @@ public class JTraceDisplay<K>
           final double[] yn = traceData.getYnData ();
           if (xn == null || xn.length == 0 || yn == null || yn.length == 0)
             continue;
-          final TraceData.IntegerRange nRange = traceData.getNRange ();
+          final TraceData.DoubleRange nRange = traceData.getNRange ();
           final TraceData.DoubleRange xRange = traceData.getXRange ();
           final TraceData.DoubleRange yRange = traceData.getYRange ();
           paintTrace_XYZn (
@@ -1431,6 +1434,7 @@ public class JTraceDisplay<K>
             xMargin, yMargin,
             xn, yn, null,
             nRange, xRange, yRange, null,
+            rescaleDisplayXToNRange,
             traceColor, clipColor,
             defaultTraceLineWidth,
             zModulationDisplayPolicy,
@@ -1446,7 +1450,7 @@ public class JTraceDisplay<K>
           final double[] zn = traceData.getZnData ();
           if (xn == null || xn.length == 0 || yn == null || yn.length == 0 || zn == null || zn.length == 0)
             continue;
-          final TraceData.IntegerRange nRange = traceData.getNRange ();
+          final TraceData.DoubleRange nRange = traceData.getNRange ();
           final TraceData.DoubleRange xRange = traceData.getXRange ();
           final TraceData.DoubleRange yRange = traceData.getYRange ();
           final TraceData.DoubleRange zRange = traceData.getZRange ();
@@ -1456,6 +1460,7 @@ public class JTraceDisplay<K>
             xMargin, yMargin,
             xn, yn, zn,
             nRange, xRange, yRange, zRange,
+            rescaleDisplayXToNRange,
             traceColor, clipColor,
             defaultTraceLineWidth,
             zModulationDisplayPolicy,
@@ -1469,7 +1474,7 @@ public class JTraceDisplay<K>
           final Function<Double, Double> f_y_vs_x = traceData.getF_Y_vs_X ();
           if (f_y_vs_x == null)
             continue;
-          final TraceData.IntegerRange nRange = traceData.getNRange ();
+          final TraceData.DoubleRange nRange = traceData.getNRange ();
           final TraceData.DoubleRange xRange = traceData.getXRange ();
           final TraceData.DoubleRange yRange = traceData.getYRange ();
           paintTrace_F_Y_vs_X (
@@ -1487,7 +1492,7 @@ public class JTraceDisplay<K>
           break;          
         }
         default:
-          continue;
+          return; // continue;
       }
     }    
   }
@@ -1497,10 +1502,11 @@ public class JTraceDisplay<K>
    final int width, final int height,
    final int xMargin, final int yMargin,
    final double[] xn, final double[] yn, final double[] zn,
-   final TraceData.IntegerRange nRange,
+   final TraceData.DoubleRange nRange,
    final TraceData.DoubleRange xRange,
    final TraceData.DoubleRange yRange,
    final TraceData.DoubleRange zRange,
+   final boolean rescaleDisplayXToNRange,
    final Color traceColor,
    final Color clipColor,
    final float defaultTraceLineWidth,
@@ -1519,8 +1525,9 @@ public class JTraceDisplay<K>
     if (zn != null && zn.length != yn.length)
       return;
     
-    final int minN;
-    final int maxN;
+    final double minN;       // Note: inclusive!
+    final double maxN;       // Note: exclusive!
+    final double lengthN; // The length of [minN, maxN), integral, but cast to double to avoid integer division later.
     if (nRange != null)
     {
       minN = nRange.getMin ();
@@ -1531,6 +1538,11 @@ public class JTraceDisplay<K>
       minN = 0;
       maxN = yn.length;
     }
+    // XXX Might need to make an exception for a single-valued trace...
+    // Note that minX > maxN should not happen, but we do not ever want to crash the Swing EDT.
+    if (minN >= maxN)
+      return;
+    lengthN = maxN - minN;
     
     final boolean hasXn = xn != null;
     final double minX;
@@ -1546,7 +1558,7 @@ public class JTraceDisplay<K>
       maxX = yn.length;
     }
     
-    final boolean hasYn = yn != null;
+    final boolean hasYn = true; // yn != null;
     final double minY;
     final double maxY;
     if (yRange != null)
@@ -1556,6 +1568,7 @@ public class JTraceDisplay<K>
     }
     else
     {
+      // XXX Should we restrict wrt N here?
       double y_min_now = Double.POSITIVE_INFINITY;
       double y_max_now = Double.NEGATIVE_INFINITY;
       for (int n = 0; n < yn.length; n++)
@@ -1588,8 +1601,12 @@ public class JTraceDisplay<K>
       }
       else
       {
+      // XXX Should we restrict wrt N here?
         double z_min_now = Double.POSITIVE_INFINITY;
         double z_max_now = Double.NEGATIVE_INFINITY;
+        // Satisfy compiler.
+        if (zn == null)
+          return;
         for (int n = 0; n < zn.length; n++)
         {
           if (zn[n] < z_min_now)
@@ -1615,16 +1632,26 @@ public class JTraceDisplay<K>
       maxZ = Double.NEGATIVE_INFINITY;      
     }
     
-    final int traceLength = yn.length;
     double x_n_g2d_prev = 0;
     double y_n_g2d_prev = 0;
-    boolean clipped = false;
-    for (int n = 0; n < traceLength; n++) // XXX Still requires correction for the n range.
+    boolean first = true;
+    // for (int n = 0; n < traceLength; n++) // XXX Still requires correction for the n range.
+    // Note that the NRange in terms of minN and maxN ALWAYS determines the range of values shown in the display.
+    for (int n = Math.max (0, (int) Math.ceil (minN)); n < Math.min (yn.length, maxN); n++)
     {
       
+      boolean clipped = false;
+      
+      // Obtain the Graphics2D X value x_n_g2d for the sample.
       double x_n_g2d;
       if (xn == null)
-        x_n_g2d = xMargin + ((double) width - 2 * xMargin) * n / yn.length;
+      {
+        // XXX Note: This displays the sample top-left of the hypothetical "value" column...
+        if (rescaleDisplayXToNRange)
+          x_n_g2d = xMargin + ((double) width - 2 * xMargin) * (n - minN) / lengthN;
+        else
+          x_n_g2d = xMargin + ((double) width - 2 * xMargin) * n / yn.length;        
+      }
       else
         x_n_g2d = xMargin + ((double) width - 2 * xMargin) * (xn[n] - minX) / (maxX - minX);
       if (x_n_g2d < xMargin)
@@ -1640,6 +1667,7 @@ public class JTraceDisplay<K>
         x_n_g2d_prev = width - xMargin;
       }
         
+      // Obtain the Graphics2D Y value y_n_g2d for the sample.
       double y_n_g2d = yMargin + (height - 2 * yMargin) * (maxY - yn[n]) / (maxY - minY);
       if (y_n_g2d < yMargin)
       {
@@ -1691,13 +1719,12 @@ public class JTraceDisplay<K>
       g2d.setColor (clipped ? clipColor : zModulatedTraceColor);
       g2d.setStroke (zModulatedStroke);
       
-      if (n > 0)
+      if (! first)
         g2d.draw (new Line2D.Double (x_n_g2d_prev, y_n_g2d_prev, x_n_g2d, y_n_g2d));
       
       x_n_g2d_prev = x_n_g2d;
       y_n_g2d_prev = y_n_g2d;
-      
-      clipped = false;
+      first = false;
       
     }
     
@@ -1708,7 +1735,7 @@ public class JTraceDisplay<K>
    final int width, final int height,
    final int xMargin, final int yMargin,
    final Function<Double, Double> f_y_vs_x,
-   final TraceData.IntegerRange nRange,
+   final TraceData.DoubleRange nRange,
    final TraceData.DoubleRange xRange,
    final TraceData.DoubleRange yRange,
    final Color traceColor,
@@ -1729,8 +1756,8 @@ public class JTraceDisplay<K>
       return;
 
 // XXX NEED TO FIGURE OUT N RANGE SEMANTICS FOR F_X_vs_Y!    
-//    final int minN;
-//    final int maxN;
+//    final double minN;
+//    final double maxN;
 //    if (nRange != null)
 //    {
 //      minN = nRange.getMin ();
