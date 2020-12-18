@@ -62,6 +62,12 @@ public final class TraceEntry
    * @param traceColor              The trace color, may be {@code null}.
    * @param traceMarkers            The (initial) {@link Set} of trace markers, may be {@code null} or empty
    *                                  but must <i>not</i> contain {@code null}.
+   * @param xOffset                 The X Offset, see {@link #getXOffset};
+   *                                  may be {@code null} in which case the offset defaults to zero.
+   * @param yOffset                 The Y Offset, see {@link #getYOffset};
+   *                                  may be {@code null} in which case the offset defaults to zero.
+   * @param zOffset                 The Z Offset, see {@link #getZOffset};
+   *                                  may be {@code null} in which case the offset defaults to zero.
    * 
    * @throws IllegalArgumentException If the set of trace markers contains {@code null}.
    * 
@@ -70,7 +76,10 @@ public final class TraceEntry
     final TraceData traceData,
     final boolean rescaleDisplayXToNRange,
     final Color traceColor,
-    final Set<TraceMarker> traceMarkers)
+    final Set<TraceMarker> traceMarkers,
+    final Double xOffset,
+    final Double yOffset,
+    final Double zOffset)
   {
     this.traceData = traceData;
     this.rescaleDisplayXToNRange = rescaleDisplayXToNRange;
@@ -81,12 +90,18 @@ public final class TraceEntry
         throw new IllegalArgumentException ();
       this.traceMarkers.addAll (traceMarkers);
     }
+    this.xOffset = (xOffset != null) ? xOffset : 0;
+    this.yOffset = (yOffset != null) ? yOffset : 0;
+    this.zOffset = (zOffset != null) ? zOffset : 0;
   }
 
   /** Constructs the trace entry (auxiliary constructor).
    * 
    * <p>
    * The initial {@link Set} of {@link TraceMarker}s is empty.
+   * 
+   * <p>
+   * X, Y and Z Offsets are set to zero.
    * 
    * @param traceData               The trace data, may be {@code null}.
    * @param rescaleDisplayXToNRange Whether or not to rescale the display X range in case of a partial N range.
@@ -98,7 +113,7 @@ public final class TraceEntry
     final boolean rescaleDisplayXToNRange,
     final Color traceColor)
   {
-    this (traceData, rescaleDisplayXToNRange, traceColor, null);
+    this (traceData, rescaleDisplayXToNRange, traceColor, null, null, null, null);
   }
 
   /** Constructs the trace entry (auxiliary constructor).
@@ -110,6 +125,9 @@ public final class TraceEntry
    * <p>
    * The initial {@link Set} of {@link TraceMarker}s is empty.
    * 
+   * <p>
+   * X, Y and Z Offsets are set to zero.
+   * 
    * @param traceData               The trace data, may be {@code null}.
    * @param traceColor              The trace color, may be {@code null}.
    * 
@@ -120,7 +138,7 @@ public final class TraceEntry
     final TraceData traceData,
     final Color traceColor)
   {
-    this (traceData, TraceEntry.DEFAULT_RESCALE_DISPLAY_X_TO_N_RANGE, traceColor, null);
+    this (traceData, TraceEntry.DEFAULT_RESCALE_DISPLAY_X_TO_N_RANGE, traceColor, null, null, null, null);
   }
 
   /** The empty trace entry (no data, color, markers, etc.).
@@ -129,10 +147,20 @@ public final class TraceEntry
    * Traces (necessarily added later) with partial N ranges are expanded in the display by default
    * (the argument is given the value {@link #DEFAULT_RESCALE_DISPLAY_X_TO_N_RANGE}).
    * 
+   * <p>
+   * X, Y and Z Offsets are set to zero.
+   * 
    * @see #DEFAULT_RESCALE_DISPLAY_X_TO_N_RANGE
    * 
    */
-  public static TraceEntry EMPTY = new TraceEntry (null, TraceEntry.DEFAULT_RESCALE_DISPLAY_X_TO_N_RANGE, null, null);
+  public static TraceEntry EMPTY = new TraceEntry (
+    null,
+    TraceEntry.DEFAULT_RESCALE_DISPLAY_X_TO_N_RANGE,
+    null,
+    null,
+    null,
+    null,
+    null);
   
   /** Creates a copy with given {@link TraceData}.
    * 
@@ -143,7 +171,14 @@ public final class TraceEntry
    */
   public final TraceEntry withTraceData (final TraceData traceData)
   {
-    return new TraceEntry (traceData, this.rescaleDisplayXToNRange, this.traceColor, this.traceMarkers);
+    return new TraceEntry (
+      traceData,
+      this.rescaleDisplayXToNRange,
+      this.traceColor,
+      this.traceMarkers,
+      this.xOffset,
+      this.yOffset,
+      this.zOffset);
   }
   
   /** Creates a copy with given setting whether or not to rescale the display X range in case of a partial N range.
@@ -155,7 +190,14 @@ public final class TraceEntry
    */
   public final TraceEntry withRescaleDisplayXToNRange (final boolean rescaleDisplayXToNRange)
   {
-    return new TraceEntry (this.traceData, rescaleDisplayXToNRange, this.traceColor, this.traceMarkers);
+    return new TraceEntry (
+      this.traceData,
+      rescaleDisplayXToNRange,
+      this.traceColor,
+      this.traceMarkers,
+      this.xOffset,
+      this.yOffset,
+      this.zOffset);
   }
   
   /** Creates a copy with given trace {@link Color}.
@@ -167,7 +209,14 @@ public final class TraceEntry
    */
   public final TraceEntry withTraceColor (final Color traceColor)
   {
-    return new TraceEntry (this.traceData, this.rescaleDisplayXToNRange, traceColor, this.traceMarkers);
+    return new TraceEntry (
+      this.traceData,
+      this.rescaleDisplayXToNRange,
+      traceColor,
+      this.traceMarkers,
+      this.xOffset,
+      this.yOffset,
+      this.zOffset);
   }
   
   /** Creates a copy with given trace markers ({@link TraceMarker}s).
@@ -184,7 +233,14 @@ public final class TraceEntry
    */
   public final TraceEntry withTraceMarkers (final Set<TraceMarker> traceMarkers)
   {
-    return new TraceEntry (this.traceData, this.rescaleDisplayXToNRange, this.traceColor, traceMarkers);
+    return new TraceEntry (
+      this.traceData,
+      this.rescaleDisplayXToNRange,
+      this.traceColor,
+      traceMarkers,
+      this.xOffset,
+      this.yOffset,
+      this.zOffset);
   }
   
   /** Creates a copy with added given trace markers ({@link TraceMarker}s).
@@ -204,7 +260,14 @@ public final class TraceEntry
     final EnumSet<TraceMarker> newTraceMarkers = EnumSet.copyOf (this.traceMarkers);
     if (traceMarkers != null)
       newTraceMarkers.addAll (traceMarkers);
-    return new TraceEntry (this.traceData, this.rescaleDisplayXToNRange, this.traceColor, newTraceMarkers);
+    return new TraceEntry (
+      this.traceData,
+      this.rescaleDisplayXToNRange,
+      this.traceColor,
+      newTraceMarkers,
+      this.xOffset,
+      this.yOffset,
+      this.zOffset);
   }
   
   /** Creates a copy without trace markers ({@link TraceMarker}s).
@@ -214,7 +277,77 @@ public final class TraceEntry
    */
   public final TraceEntry withoutTraceMarkers ()
   {
-    return new TraceEntry (this.traceData, this.rescaleDisplayXToNRange, this.traceColor, null);
+    return new TraceEntry (
+      this.traceData,
+      this.rescaleDisplayXToNRange,
+      this.traceColor,
+      null,
+      this.xOffset,
+      this.yOffset,
+      this.zOffset);
+  }
+  
+  /** Creates a copy with given X Offset.
+   * 
+   * @param xOffset The new X Offset.
+   * 
+   * @return The new {@link TraceEntry}.
+   * 
+   * @see #getXOffset
+   * 
+   */
+  public final TraceEntry withXOffset (final double xOffset)
+  {
+    return new TraceEntry (
+      this.traceData,
+      this.rescaleDisplayXToNRange,
+      this.traceColor,
+      this.traceMarkers,
+      xOffset,
+      this.yOffset,
+      this.zOffset);
+  }
+  
+  /** Creates a copy with given Y Offset.
+   * 
+   * @param yOffset The new Y Offset.
+   * 
+   * @return The new {@link TraceEntry}.
+   * 
+   * @see #getYOffset
+   * 
+   */
+  public final TraceEntry withYOffset (final double yOffset)
+  {
+    return new TraceEntry (
+      this.traceData,
+      this.rescaleDisplayXToNRange,
+      this.traceColor,
+      this.traceMarkers,
+      this.xOffset,
+      yOffset,
+      this.zOffset);
+  }
+  
+  /** Creates a copy with given Z Offset.
+   * 
+   * @param zOffset The new Z Offset.
+   * 
+   * @return The new {@link TraceEntry}.
+   * 
+   * @see #getZOffset
+   * 
+   */
+  public final TraceEntry withZOffset (final double zOffset)
+  {
+    return new TraceEntry (
+      this.traceData,
+      this.rescaleDisplayXToNRange,
+      this.traceColor,
+      this.traceMarkers,
+      this.xOffset,
+      this.yOffset,
+      zOffset);
   }
   
   //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -294,6 +427,75 @@ public final class TraceEntry
   public final Set<TraceMarker> getTraceMarkers ()
   {
     return Collections.unmodifiableSet (this.traceMarkers);
+  }
+  
+  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  //
+  // X, Y, Z OFFSETS
+  //
+  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  
+  private final double xOffset;
+  
+  /** Returns the X Offset.
+   * 
+   * <p>
+   * The X offset is used when the X values and ranges do not reflect the real "physical" values of the data,
+   * but are instead <i>to be</i> shifted by this offset.
+   * In other words, the real value is the value from the data <i>plus</i> the offset.
+   * 
+   * <p>
+   * Offset data present here <i>never</i> affect the way the trace is displayed on the screen, but hey
+   * are important hints to display components so they show "real" physical values when needed/requested.
+   * 
+   * @return The X offset (default zero).
+   * 
+   */
+  public final double getXOffset ()
+  {
+    return this.xOffset;
+  }
+  
+  private final double yOffset;
+  
+  /** Returns the Y Offset.
+   * 
+   * <p>
+   * The Y offset is used when the Y values and ranges do not reflect the real "physical" values of the data,
+   * but are instead <i>to be</i> shifted by this offset.
+   * In other words, the real value is the value from the data <i>plus</i> the offset.
+   * 
+   * <p>
+   * Offset data present here <i>never</i> affect the way the trace is displayed on the screen, but hey
+   * are important hints to display components so they show "real" physical values when needed/requested.
+   * 
+   * @return The Y offset (default zero).
+   * 
+   */
+  public final double getYOffset ()
+  {
+    return this.yOffset;
+  }
+  
+  private final double zOffset;
+  
+  /** Returns the Z Offset.
+   * 
+   * <p>
+   * The Z offset is used when the Z values and ranges do not reflect the real "physical" values of the data,
+   * but are instead <i>to be</i> shifted by this offset.
+   * In other words, the real value is the value from the data <i>plus</i> the offset.
+   * 
+   * <p>
+   * Offset data present here <i>never</i> affect the way the trace is displayed on the screen, but hey
+   * are important hints to display components so they show "real" physical values when needed/requested.
+   * 
+   * @return The Z offset (default zero).
+   * 
+   */
+  public final double getZOffset ()
+  {
+    return this.zOffset;
   }
   
   //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
