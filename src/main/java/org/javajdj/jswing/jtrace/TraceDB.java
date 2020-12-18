@@ -421,6 +421,132 @@ public class TraceDB<K>
   
   //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
   //
+  // TRACE X, Y, Z OFFSETS
+  //
+  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  
+  /** Gets the X Offset of the trace with given key.
+   * 
+   * @param k The key, may be {@code null}.
+   * 
+   * @return The trace's X Offset, {@link Double#NaN} if the key is unknown.
+   * 
+   * @see TraceEntry#getXOffset
+   * 
+   */
+  public final double getXOffset (final K k)
+  {
+    synchronized (this.traceEntriesLock)
+    {
+      if (this.traceEntries.containsKey (k))
+        return this.traceEntries.get (k).getXOffset ();
+      else
+        return Double.NaN;
+    }
+  }
+  
+  /** Sets the X Offset for given key.
+   * 
+   * <p>
+   * This method creates a new {@link TraceEntry} for given key if that key is not yet present in the database.
+   * 
+   * @param k       The key, may be {@code null}.
+   * @param xOffset The new X Offset for given key.
+   * 
+   * @see TraceEntry#getXOffset
+   * 
+   */
+  public final void setXOffset (final K k, final double xOffset)
+  {
+    synchronized (this.traceEntriesLock)
+    {
+      this.traceEntries.put (k, getOrCreateTraceEntry (k).withXOffset (xOffset));
+    }
+    fireDBChanged ();
+  }
+  
+  /** Gets the Y Offset of the trace with given key.
+   * 
+   * @param k The key, may be {@code null}.
+   * 
+   * @return The trace's Y Offset, {@link Double#NaN} if the key is unknown.
+   * 
+   * @see TraceEntry#getYOffset
+   * 
+   */
+  public final double getYOffset (final K k)
+  {
+    synchronized (this.traceEntriesLock)
+    {
+      if (this.traceEntries.containsKey (k))
+        return this.traceEntries.get (k).getYOffset ();
+      else
+        return Double.NaN;
+    }
+  }
+  
+  /** Sets the Y Offset for given key.
+   * 
+   * <p>
+   * This method creates a new {@link TraceEntry} for given key if that key is not yet present in the database.
+   * 
+   * @param k       The key, may be {@code null}.
+   * @param yOffset The new Y Offset for given key.
+   * 
+   * @see TraceEntry#getYOffset
+   * 
+   */
+  public final void setYOffset (final K k, final double yOffset)
+  {
+    synchronized (this.traceEntriesLock)
+    {
+      this.traceEntries.put (k, getOrCreateTraceEntry (k).withYOffset (yOffset));
+    }
+    fireDBChanged ();
+  }
+  
+  /** Gets the Z Offset of the trace with given key.
+   * 
+   * @param k The key, may be {@code null}.
+   * 
+   * @return The trace's Z Offset, {@link Double#NaN} if the key is unknown.
+   * 
+   * @see TraceEntry#getZOffset
+   * 
+   */
+  public final double getZOffset (final K k)
+  {
+    synchronized (this.traceEntriesLock)
+    {
+      if (this.traceEntries.containsKey (k))
+        return this.traceEntries.get (k).getZOffset ();
+      else
+        return Double.NaN;
+    }
+  }
+  
+  /** Sets the Z Offset for given key.
+   * 
+   * <p>
+   * This method creates a new {@link TraceEntry} for given key if that key is not yet present in the database.
+   * 
+   * @param k       The key, may be {@code null}.
+   * @param zOffset The new Z Offset for given key.
+   * 
+   * @see TraceEntry#getZOffset
+   * 
+   */
+  public final void setZOffset (final K k, final double zOffset)
+  {
+    synchronized (this.traceEntriesLock)
+    {
+      this.traceEntries.put (k, getOrCreateTraceEntry (k).withZOffset (zOffset));
+    }
+    fireDBChanged ();
+  }
+  
+  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  //
   // END OF FILE
   //
   //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
