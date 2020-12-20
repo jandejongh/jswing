@@ -211,19 +211,25 @@ class JTraceSidePanel<K>
                 case NORTH:
                 case SOUTH:
                 {
+                  // The real value is the value from the data plus the offset.
+                  // The offset is normally zero.
+                  // So we need to put the marker at x[data] == -xOffset.
+                  final double xOffset = te.getXOffset ();
+                  // The value in the data that represents x == 0, taking into account the offset.
+                  final double xZero = -xOffset;
                   // Note that we can always safely ask the X range on the Trace Data.
                   final TraceData.DoubleRange xRange = te.getTraceData ().getXRange ();
                   if (xRange == null)
                     continue;
                   final double relPosition;
                   final boolean isClipped;
-                  if (xRange.getMax () < 0)
+                  if (xRange.getMax () < xZero)
                   {
                     // Zero is "right of us".
                     relPosition = 1;
                     isClipped = true;
                   }
-                  else if (xRange.getMin () > 0)
+                  else if (xRange.getMin () > xZero)
                   {
                     // Zero is "left of us".
                     relPosition = 0;
@@ -237,9 +243,9 @@ class JTraceSidePanel<K>
                   else
                   {
                     // x = xmin + p (xmax-xmin)
-                    // x = 0 -> p(xmax - xmin) = -xmin
-                    // p = - xmin / (xmax - xmin)
-                    relPosition = - xRange.getMin () / xRange.getLength ();
+                    // x = x0 -> p(xmax - xmin) = x0 - xmin
+                    // -> p = (x0 - xmin) / (xmax - xmin)
+                    relPosition = (xZero - xRange.getMin ()) / xRange.getLength ();
                     isClipped = false;
                   }
                   final Path2D path = getTrianglePath (this.location, null, getSidePanelThickness ());
@@ -257,19 +263,25 @@ class JTraceSidePanel<K>
                 case EAST:
                 case WEST:
                 {
+                  // The real value is the value from the data plus the offset.
+                  // The offset is normally zero.
+                  // So we need to put the marker at y[data] == -yOffset.
+                  final double yOffset = te.getYOffset ();
+                  // The value in the data that represents y == 0, taking into account the offset.
+                  final double yZero = -yOffset;
                   // Note that we can always safely ask the Y range on the Trace Data.
                   final TraceData.DoubleRange yRange = te.getTraceData ().getYRange ();
                   if (yRange == null)
                     continue;
                   final double relPosition;
                   final boolean isClipped;
-                  if (yRange.getMax () < 0)
+                  if (yRange.getMax () < yZero)
                   {
                     // Zero is "above".
                     relPosition = 1;
                     isClipped = true;
                   }
-                  else if (yRange.getMin () > 0)
+                  else if (yRange.getMin () > yZero)
                   {
                     // Zero is "below".
                     relPosition = 0;
@@ -283,9 +295,9 @@ class JTraceSidePanel<K>
                   else
                   {
                     // y = ymin + p (ymax-ymin)
-                    // y = 0 -> p(ymax - ymin) = -ymin
-                    // p = - ymin / (ymax - ymin)
-                    relPosition = - yRange.getMin () / yRange.getLength ();
+                    // y = y0 -> p(ymax - ymin) = y0 - ymin
+                    // -> p = (y0 - ymin) / (ymax - ymin)
+                    relPosition = (yZero - yRange.getMin ()) / yRange.getLength ();
                     isClipped = false;
                   }
                   final Path2D path = getTrianglePath (this.location, null, getSidePanelThickness ());
