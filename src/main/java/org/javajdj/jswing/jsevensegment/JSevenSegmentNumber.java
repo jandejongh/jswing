@@ -1,5 +1,5 @@
 /*
- * Copyright 2010-2020 Jan de Jongh <jfcmdejongh@gmail.com>.
+ * Copyright 2010-2021 Jan de Jongh <jfcmdejongh@gmail.com>.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -106,14 +106,27 @@ public class JSevenSegmentNumber
   
   private final JSevenSegmentDigit[] digits;
   
-  /** Returns the number of digits in this component, excluding the minus-sign digit.
+  /** Returns the total number of digits (including fractional ones) in this component, excluding the minus-sign.
    * 
-   * @return The number of digits in this component, excluding the minus-sign digit.
+   * @return The total number of digits (including fractional ones) in this component, excluding the minus-sign.
    * 
    */
   public final int getNumberOfDigits ()
   {
     return this.digits.length;
+  }
+  
+  /** Returns the number of fractional digits in this component.
+   * 
+   * @return The number of fractional digits in this component.
+   * 
+   */
+  public final int getNumberOfFractionalDigits ()
+  {
+    if (getDecimalPointIndex () >= 0)
+      return getNumberOfDigits () - getDecimalPointIndex () - 1;
+    else
+      return 0;
   }
   
   private static int numberOfDigits (final double minValue, final double maxValue, final double resolution)
@@ -192,6 +205,58 @@ public class JSevenSegmentNumber
   
   //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
   //
+  // MINIMUM/MAXIMUM REPRESENTABLE NUMBER
+  // IN RANGE
+  //
+  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  
+  /** Returns the minimum (most negative) number representable in this component.
+   * 
+   * <p>
+   * Note that zero is returned if no minus (sign) digit is present.
+   * 
+   * @return The minimum (most negative) number representable in this component.
+   * 
+   */
+  public final double getMinimumRepresentableNumber ()
+  {
+    if (this.minus == null)
+      return 0;
+    return -getMaximumRepresentableNumber ();
+  }
+  
+  /** Returns the maximum (most positive) number representable in this component.
+   * 
+   * @return The maximum (most positive) number representable in this component.
+   * 
+   */
+  public final double getMaximumRepresentableNumber ()
+  {
+    return
+      Math.pow (10.0, getNumberOfDigits () - getNumberOfFractionalDigits ())
+      - Math.pow (10.0, -getNumberOfFractionalDigits ());
+  }
+  
+  /** Checks whether a given number is in representation range of this component.
+   * 
+   * @param d The number.
+   * 
+   * @return True if and only if the number
+   *           is not a {@code NaN},
+   *           is finite,
+   *           and is within the representation range of this component.
+   * 
+   * @see #getMinimumRepresentableNumber
+   * @see #getMaximumRepresentableNumber
+   * 
+   */
+  public final boolean isInRange (final double d)
+  {
+    return Double.isFinite (d) && d >= getMinimumRepresentableNumber () && d <= getMaximumRepresentableNumber ();
+  }
+  
+  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  //
   // NUMBER
   //
   //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -205,6 +270,12 @@ public class JSevenSegmentNumber
   
   public void setNumber (final double d)
   {
+    this.number = d;
+    if (! isInRange (d))
+    {
+      setOverflow (this.minus != null && d < 0);
+      return;
+    }
     if (this.minus != null)
     {
       if (d < 0)
@@ -265,6 +336,12 @@ public class JSevenSegmentNumber
   
   /** Blanks all digits, including (if present) sign and decimal points.
    * 
+   * <p>
+   * Note that this method also erases the internally stored number.
+   * This may change in future releases...
+   * 
+   * @see #getNumber
+   * 
    */
   public final void setBlank ()
   {
@@ -278,7 +355,37 @@ public class JSevenSegmentNumber
       digit.setBlank ();
       digit.repaint ();
     }
+    // XXX This really does not feel right, but there many dependencies using this, so we cannot blindly change it...
+    // Why are we changing the number here?
     this.number = null;
+  }
+  
+  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  //
+  // DISPLAY OVERFLOW
+  //
+  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  
+  /** Displays an overflow condition on the digits.
+   * 
+   * @param displayMinusSign Whether or not to display the minus sign (if available).
+   * 
+   */
+  private void setOverflow (final boolean showMinusSign)
+  {
+    if (this.minus != null)
+    {
+      if (showMinusSign)
+        this.minus.setMinus ();
+      else
+        this.minus.setBlank ();
+      this.minus.repaint ();      
+    }
+    for (final JSevenSegmentDigit digit: this.digits)
+    {
+      digit.setSmallO ();
+      digit.repaint ();
+    }
   }
   
   //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
