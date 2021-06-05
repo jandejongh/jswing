@@ -19,6 +19,7 @@ package org.javajdj.jswing.jcolorcheckbox;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Graphics;
+import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.HashMap;
@@ -49,6 +50,15 @@ import org.javajdj.jswing.util.SwingUtilsJdJ;
  * The same applies to the {@code icon} property,
  * since it is used internally by this class.
  * Attempts to modify the {@code icon} property will result in an {@link UnsupportedOperationException}.
+ * 
+ * <p>
+ * A {@link JColorCheckBox} internally holds a reference to the value it displays,
+ * see {@link #getDisplayedValue} and {@link #setDisplayedValue(java.lang.Object, boolean)}.
+ * The displayed value is <i>independent</i> of the {@code selected} state of the button
+ * (which itself is always shown as {@code false}).
+ * 
+ * <p>
+ * If you want the button to respond to button actions, you need to register an {@link ActionListener}.
  * 
  * <p>
  * The {@code class} features constructor providing a {@link Map}
@@ -126,6 +136,19 @@ public class JColorCheckBox<E>
   public JColorCheckBox (final Map<E, Color> colorMap)
   {
     this ((E e) -> (colorMap != null ? colorMap.get (e) : null));
+  }
+  
+  /** Constructs a {@link JColorCheckBox} that does not change its appearance.
+   *
+   * <p>
+   * The check-box background is <i>not</i> painted.
+   * 
+   * @since 0.7
+   * 
+   */
+  public JColorCheckBox ()
+  {
+    this ((Function) null);
   }
   
   //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
