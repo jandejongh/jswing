@@ -1,5 +1,5 @@
 /*
- * Copyright 2010-2020 Jan de Jongh <jfcmdejongh@gmail.com>.
+ * Copyright 2010-2021 Jan de Jongh <jfcmdejongh@gmail.com>.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -145,7 +145,7 @@ public class JSevenSegmentDigit
  
   //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
   //
-  // METHODS SETTINGS THE SEGMENT PAINT MAP
+  // METHODS SETTING THE SEGMENT PAINT MAP
   //
   //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
   
@@ -181,6 +181,8 @@ public class JSevenSegmentDigit
     /* 9 */ { true,  true,  true,  true, false,  true,  true }
   };
   
+  private final static boolean SMALL_O[] = new boolean[] { false,  false,  true,  true,  true,  false,  true };
+  
   /** Shows the given number, which must be between 0 and 9 inclusive.
    * 
    * <p>
@@ -195,7 +197,7 @@ public class JSevenSegmentDigit
   {
     if (n < 0 || n > 9)
       throw new IllegalArgumentException ();
-    for (Segment s : Segment.values ())
+    for (final Segment s : Segment.values ())
       if (s.ordinal () >= Segment.a.ordinal () && s.ordinal () <= Segment.g.ordinal ())
         this.segmentPaintMap.put (s, JSevenSegmentDigit.NUMBERS[n][s.ordinal ()]);
   }
@@ -208,6 +210,20 @@ public class JSevenSegmentDigit
   public void setDecimalPoint (final boolean decimalPoint)
   {
     this.segmentPaintMap.put (Segment.dot, decimalPoint);      
+  }
+  
+  /** Shows a small letter 'o' (not affecting the decimal point).
+   * 
+   * <p>
+   * The small letter 'o' is typically used to indicate an overflow condition,
+   * but this is by no means enforced by this class.
+   * 
+   */
+  public void setSmallO ()
+  {
+    for (final Segment s : Segment.values ())
+      if (s.ordinal () >= Segment.a.ordinal () && s.ordinal () <= Segment.g.ordinal ())
+        this.segmentPaintMap.put (s, JSevenSegmentDigit.SMALL_O[s.ordinal ()]);    
   }
   
   //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
