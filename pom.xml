@@ -6,7 +6,7 @@
 
   <groupId>org.javajdj</groupId>
   <artifactId>jswing</artifactId>
-  <version>0.7-SNAPSHOT</version>
+  <version>0.7</version>
   <packaging>jar</packaging>
 
   <name>jswing</name>
@@ -117,7 +117,7 @@
     <dependency>
       <groupId>${project.groupId}</groupId>
       <artifactId>junits</artifactId>
-      <version>0.1</version>
+      <version>0.2</version>
     </dependency>
     
   </dependencies>
