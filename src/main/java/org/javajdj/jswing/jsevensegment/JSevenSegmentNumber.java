@@ -1,5 +1,5 @@
 /*
- * Copyright 2010-2021 Jan de Jongh <jfcmdejongh@gmail.com>.
+ * Copyright 2010-2022 Jan de Jongh <jfcmdejongh@gmail.com>.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,8 @@ import java.util.logging.Logger;
 import javax.swing.BorderFactory;
 import javax.swing.JPanel;
 
-/** A multi-digit seven-segment display capable of showing a number in fixed-point decimal notation.
+/** A multi-digit seven-segment display capable of showing a number in fixed-point decimal notation
+ *  (with leading-zero suppression support).
  * 
  * @author Jan de Jongh {@literal <jfcmdejongh@gmail.com>}
  *
@@ -50,6 +51,19 @@ public class JSevenSegmentNumber
   //
   //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
   
+  /** Creates the component (main constructor).
+   * 
+   * <p>
+   * Main constructor.
+   * 
+   * @param mediumColor       The color of the digits, may be {@code null}; {@link JSevenSegmentDigit}.
+   * @param sign              Whether or not to include a digit for the sign.
+   * @param numberOfDigits    The number of digits to display (excluding the sign digit).
+   * @param decimalPointIndex The index of the decimal point, -1 if no decimal point is to be displayed.
+   * 
+   * @see JSevenSegmentDigit
+   * 
+   */
   public JSevenSegmentNumber (
     final Color mediumColor,
     final boolean sign,
@@ -75,6 +89,15 @@ public class JSevenSegmentNumber
     this.number = null;
   }
   
+  /** Creates the component with default digit color.
+   * 
+   * @param sign              See main constructor.
+   * @param numberOfDigits    See main constructor.
+   * @param decimalPointIndex See main constructor.
+   * 
+   * @see JSevenSegmentNumber#JSevenSegmentNumber(java.awt.Color, boolean, int, int)
+   * 
+   */
   public JSevenSegmentNumber (
     final boolean sign,
     final int numberOfDigits,
@@ -83,6 +106,16 @@ public class JSevenSegmentNumber
     this (null, sign, numberOfDigits, decimalPointIndex);
   }
   
+  /** Creates the component with given range and resolution.
+   * 
+   * @param mediumColor See main constructor.
+   * @param minValue    The minimum value to represent.
+   * @param maxValue    The maximum value to represent.
+   * @param resolution  The highest resolution of the value to represent.
+   * 
+   * @see JSevenSegmentNumber#JSevenSegmentNumber(java.awt.Color, boolean, int, int)
+   * 
+   */
   public JSevenSegmentNumber (
     final Color mediumColor,
     final double minValue,
@@ -166,6 +199,16 @@ public class JSevenSegmentNumber
   
   private final int defaultDecimalPointIndex;
   
+  /** Returns the default decimal point index (set upon construction).
+   * 
+   * <p>
+   * Note that the actual decimal point index can be changed through {@link #setDecimalPointIndex(int)}.
+   * 
+   * @return The default decimal point index (set upon construction), -1 if no default decimal point is present.
+   * 
+   * @see #getDefaultDecimalPointIndex
+   * 
+   */
   public final int getDefaultDecimalPointIndex ()
   {
     return this.defaultDecimalPointIndex;
@@ -173,11 +216,29 @@ public class JSevenSegmentNumber
   
   private int decimalPointIndex;
   
+  /** Returns the (actual) decimal point index.
+   * 
+   * <p>
+   * Note that the actual decimal point index can be changed through {@link #setDecimalPointIndex(int)}.
+   * 
+   * @return The decimal point index, -1 if no actual decimal point is present.
+   * 
+   * @see #getDefaultDecimalPointIndex
+   * @see #setDecimalPointIndex(int)
+   * 
+   */
   public final int getDecimalPointIndex ()
   {
     return this.decimalPointIndex;
   }
   
+  /** Sets the actual decimal point index.
+   * 
+   * @param decimalPointIndex The new decimal point index.
+   * 
+   * @see #getDecimalPointIndex
+   * 
+   */
   public final void setDecimalPointIndex (final int decimalPointIndex)
   {
     if (decimalPointIndex != this.decimalPointIndex)
@@ -188,6 +249,11 @@ public class JSevenSegmentNumber
     }
   }
   
+  /** Sets the actual decimal point index to its default value.
+   * 
+   * @see #getDefaultDecimalPointIndex
+   * 
+   */
   public final void setDecimalPointIndex ()
   {
     setDecimalPointIndex (this.defaultDecimalPointIndex);
@@ -263,11 +329,27 @@ public class JSevenSegmentNumber
   
   private Double number = null;
   
+  /** Returns the number being displayed.
+   * 
+   * @return The number being displayed; may be {@code null} in which case a blank display is shown.
+   * 
+   */
   public final Double getNumber ()
   {
     return this.number;
   }
   
+  /** Sets the number being displayed.
+   * 
+   * <p>
+   * Main display routine for non-{code null} numbers; sets all digits.
+   * 
+   * @param d The number to display.
+   * 
+   * @see #setNumber(java.lang.Double)
+   * @see #setBlank
+   * 
+   */
   public void setNumber (final double d)
   {
     this.number = d;
@@ -304,6 +386,7 @@ public class JSevenSegmentNumber
     }
     for (int i = 0; i < this.digits.length; i++)
     {
+      boolean leadingZero = true;
       int digit = 0;
       try
       {
@@ -314,12 +397,26 @@ public class JSevenSegmentNumber
         LOG.log (Level.SEVERE, "NumberFormatException, char = {0}.", s.charAt (i));
         throw new RuntimeException (nfs);
       }
-      this.digits[i].setNumber (digit);
+      leadingZero &= (digit == 0);
+      if (this.suppressLeadingZeroes
+        && leadingZero
+        && (i < this.digits.length - 1)
+        && (this.decimalPointIndex < 0 || i < this.decimalPointIndex))
+        this.digits[i].setBlank ();
+      else
+        this.digits[i].setNumber (digit);
       this.digits[i].setDecimalPoint (i == this.decimalPointIndex);
       this.digits[i].repaint ();
     }  
   }
 
+  /** Sets the number displayed.
+   * 
+   * @param number The number displayed; may be {@code null} in which case a blank display is shown.
+   * 
+   * @see #setBlank
+   * 
+   */
   public final void setNumber (final Double number)
   {
     if (number != null)
@@ -337,10 +434,10 @@ public class JSevenSegmentNumber
   /** Blanks all digits, including (if present) sign and decimal points.
    * 
    * <p>
-   * Note that this method also erases the internally stored number.
-   * This may change in future releases...
+   * Note that this method also erases (sets the {@code null}) the internally stored number.
    * 
    * @see #getNumber
+   * @see #setNumber(java.lang.Double)
    * 
    */
   public final void setBlank ()
@@ -355,8 +452,6 @@ public class JSevenSegmentNumber
       digit.setBlank ();
       digit.repaint ();
     }
-    // XXX This really does not feel right, but there many dependencies using this, so we cannot blindly change it...
-    // Why are we changing the number here?
     this.number = null;
   }
   
@@ -390,8 +485,56 @@ public class JSevenSegmentNumber
   
   //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
   //
-  // END OF FILE
+  // SUPPRESS LEADING ZEROES
   //
   //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
   
+  private boolean suppressLeadingZeroes = false;
+  
+  /** Returns whether this object suppresses leading zeroes (default {@code false}).
+   * 
+   * @return Whether this object suppresses leading zeroes.
+   * 
+   * @see #setSuppressLeadingZeroes
+   * 
+   */
+  public final boolean isSuppressLeadingZeroes ()
+  {
+    return this.suppressLeadingZeroes;
+  }
+
+  /** Sets whether this object suppresses leading zeroes.
+   * 
+   * <p>
+   * When set, a consecutive sequence of zeroes starting at the first digit
+   * is suppressed up to but not including the digit with the decimal point.
+   * If no decimal point is present, a consecutive sequence of zeroes  starting at the first digit
+   * is suppressed up to but not including the last digit.
+   * The last digit as well as zero-digits following the decimal point are never suppressed.
+   * 
+   * <p>
+   * If needed, the current readout is modified to reflect the new setting.
+   * 
+   * @param suppressLeadingZeroes Whether this object suppresses leading zeroes (from now on).
+   * 
+   * @see #isSuppressLeadingZeroes
+   * @see #getDecimalPointIndex
+   * 
+   */
+  public final void setSuppressLeadingZeroes (final boolean suppressLeadingZeroes)
+  {
+    if (suppressLeadingZeroes != this.suppressLeadingZeroes)
+    {
+      this.suppressLeadingZeroes = suppressLeadingZeroes;
+      if (this.number != null)
+        setNumber (this.number);
+    }
+  }
+  
+  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  //
+  // END OF FILE
+  //
+  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 }
